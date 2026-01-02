@@ -10,7 +10,15 @@ export default [
       showLink: false
     }
   },
-  // 全屏403（无权访问）页面
+  {
+    path: "/callback",
+    name: "OAuthCallback",
+    component: () => import("@/views/login/callback.vue"),
+    meta: {
+      title: "登录回调",
+      showLink: false
+    }
+  },
   {
     path: "/access-denied",
     name: "AccessDenied",
@@ -20,7 +28,6 @@ export default [
       showLink: false
     }
   },
-  // 全屏500（服务器出错）页面
   {
     path: "/server-error",
     name: "ServerError",

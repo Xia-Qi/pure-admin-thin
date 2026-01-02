@@ -28,6 +28,19 @@ const defaultConfig: AxiosRequestConfig = {
   }
 };
 
+// OAuth 服务器基础 URL
+const oauthServerUrl = import.meta.env.VITE_OAUTH_SERVER_URL || "http://localhost:5700";
+
+// 创建 OAuth 专用的 axios 实例
+const oauthHttpInstance = Axios.create({
+  baseURL: oauthServerUrl,
+  timeout: 10000,
+  headers: {
+    Accept: "application/json, text/plain, */*",
+    "Content-Type": "application/x-www-form-urlencoded"
+  }
+});
+
 class PureHttp {
   constructor() {
     this.httpInterceptorsRequest();

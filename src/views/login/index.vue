@@ -14,11 +14,13 @@ import { initRouter, getTopMenu } from "@/router/utils";
 import { bg, avatar, illustration } from "./utils/static";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
+import { buildAuthorizationUrl } from "@/utils/oauth";
 
 import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
 import Lock from "~icons/ri/lock-fill";
 import User from "~icons/ri/user-3-fill";
+import Key from "~icons/ri/key-2-line";
 
 defineOptions({
   name: "Login"
@@ -70,6 +72,11 @@ const onLogin = async (formEl: FormInstance | undefined) => {
         .finally(() => (loading.value = false));
     }
   });
+};
+
+const handleOAuthLogin = () => {
+  const authUrl = buildAuthorizationUrl();
+  window.location.href = authUrl;
 };
 
 const immediateDebounce: any = debounce(
@@ -162,6 +169,24 @@ useEventListener(document, "keydown", ({ code }) => {
                 登录
               </el-button>
             </Motion>
+
+            <Motion :delay="300">
+              <div class="oauth-divider">
+                <span>或</span>
+              </div>
+            </Motion>
+
+            <Motion :delay="350">
+              <el-button
+                class="w-full mt-2!"
+                size="default"
+                type="success"
+                :icon="useRenderIcon(Key)"
+                @click="handleOAuthLogin"
+              >
+                使用 AccessHub 登录
+              </el-button>
+            </Motion>
           </el-form>
         </div>
       </div>
@@ -176,5 +201,25 @@ useEventListener(document, "keydown", ({ code }) => {
 <style lang="scss" scoped>
 :deep(.el-input-group__append, .el-input-group__prepend) {
   padding: 0;
+}
+
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+  color: #909399;
+  font-size: 14px;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #dcdfe6;
+  }
+
+  span {
+    padding: 0 16px;
+  }
 }
 </style>
