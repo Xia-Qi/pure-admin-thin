@@ -1,4 +1,5 @@
 import oauthConfig from "@/config/oauth";
+import { getToken } from "@/utils/auth";
 
 export interface TokenResponse {
   access_token: string;
@@ -79,12 +80,11 @@ export function refreshToken(
 }
 
 export function getUserInfo(): Promise<UserInfoResponse> {
-  const token = localStorage.getItem("authorized-token");
-  if (!token) {
+  const tokenData = getToken();
+  if (!tokenData || !tokenData.accessToken) {
     throw new Error("No token found");
   }
 
-  const tokenData = JSON.parse(token);
   return oauthRequest<UserInfoResponse>("GET", "/connect/userinfo", undefined, {
     Authorization: `Bearer ${tokenData.accessToken}`
   });

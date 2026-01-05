@@ -88,5 +88,4 @@ export function isOAuthCallback(url: string): boolean {
 
 export function clearOAuthSession(): void {
   removeState();
-  sessionStorage.removeItem("oauth_token");
 }
