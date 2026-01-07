@@ -12,10 +12,18 @@ import { setToken, removeToken, type DataInfo, userKey } from "@/utils/auth";
 import { storageLocal } from "@pureadmin/utils";
 import { useUserStoreHook } from "@/store/modules/user";
 import { initRouter, getTopMenu } from "@/router/utils";
+import Motion from "./utils/motion";
+import { useNav } from "@/layout/hooks/useNav";
+import { bg, illustration } from "./utils/static";
 
 const router = useRouter();
 const loading = ref(true);
 const error = ref<string | null>(null);
+const { title } = useNav();
+
+const handleReload = () => {
+  window.location.reload();
+};
 
 onMounted(async () => {
   try {
@@ -117,62 +125,120 @@ const handleBackToLogin = () => {
 </script>
 
 <template>
-  <div class="oauth-callback-container">
-    <div v-if="loading" class="loading-container">
-      <el-icon class="is-loading" :size="40">
-        <Loading />
-      </el-icon>
-      <p>正在登录，请稍候...</p>
-    </div>
+  <div class="select-none">
+    <img :src="bg" class="wave" />
+    <div class="login-container">
+      <div class="img">
+        <component :is="illustration" />
+      </div>
+      <div class="login-box">
+        <div class="login-form">
+          <Motion>
+            <h2 class="outline-hidden">{{ title }}</h2>
+          </Motion>
 
-    <div v-else-if="error" class="error-container">
-      <el-icon :size="60" color="#f56c6c">
-        <CircleClose />
-      </el-icon>
-      <h3>登录失败</h3>
-      <p>{{ error }}</p>
-      <el-button type="primary" @click="handleBackToLogin">
-        返回登录页
-      </el-button>
+          <!-- 加载状态 -->
+          <div v-if="loading" class="callback-content">
+            <Motion :delay="100">
+              <div class="loading-state">
+                <el-icon class="loading-icon" size="60" color="#409eff">
+                  <Loading />
+                </el-icon>
+                <h3 class="state-title">正在登录</h3>
+                <p class="state-description">我们正在为您准备账户信息...</p>
+              </div>
+            </Motion>
+          </div>
+
+          <!-- 错误状态 -->
+          <div v-else-if="error" class="callback-content">
+            <Motion :delay="100">
+              <div class="error-state">
+                <el-icon class="error-icon" size="60" color="#f56c6c">
+                  <CloseCircle />
+                </el-icon>
+                <h3 class="state-title">登录遇到问题</h3>
+                <el-alert
+                  :title="error"
+                  type="error"
+                  show-icon
+                  class="mt-4 error-message"
+                  :closable="false"
+                />
+
+                <div class="action-buttons mt-6">
+                  <el-button
+                    type="primary"
+                    size="default"
+                    class="w-full mr-2"
+                    @click="handleBackToLogin"
+                  >
+                    返回登录页
+                  </el-button>
+                  <el-button
+                    size="default"
+                    class="w-full ml-2"
+                    @click="handleReload"
+                  >
+                    重试
+                  </el-button>
+                </div>
+              </div>
+            </Motion>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.oauth-callback-container {
+@import url("@/style/login.css");
+
+.callback-content {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 100%;
+  padding: 20px 0;
 }
 
-.loading-container,
-.error-container {
-  min-width: 400px;
-  padding: 60px 80px;
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
   text-align: center;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgb(0 0 0 / 20%);
 }
 
-.loading-container p {
-  margin-top: 20px;
-  font-size: 16px;
-  color: #606266;
+.loading-icon,
+.error-icon {
+  margin-bottom: 20px;
 }
 
-.error-container h3 {
-  margin: 20px 0 10px;
-  font-size: 24px;
+.state-title {
+  margin-bottom: 12px;
+  font-size: 20px;
+  font-weight: 600;
   color: #303133;
 }
 
-.error-container p {
-  margin-bottom: 30px;
+.state-description {
+  margin-bottom: 20px;
   font-size: 14px;
-  line-height: 1.6;
-  color: #909399;
+  color: #606266;
+}
+
+.error-message {
+  width: 100%;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  width: 100%;
 }
 </style>

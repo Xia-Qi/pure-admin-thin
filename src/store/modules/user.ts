@@ -13,8 +13,15 @@ import {
   getLogin,
   refreshTokenApi
 } from "@/api/user";
+import { logout as oauthLogout } from "@/api/oauth";
 import { useMultiTagsStoreHook } from "./multiTags";
-import { type DataInfo, setToken, removeToken, userKey } from "@/utils/auth";
+import {
+  type DataInfo,
+  setToken,
+  getToken,
+  removeToken,
+  userKey
+} from "@/utils/auth";
 
 export const useUserStore = defineStore("pure-user", {
   state: (): userType => ({
@@ -76,15 +83,26 @@ export const useUserStore = defineStore("pure-user", {
           });
       });
     },
-    /** 前端登出（不调用接口） */
-    logOut() {
-      this.username = "";
-      this.roles = [];
-      this.permissions = [];
-      removeToken();
-      useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
-      resetRouter();
-      router.push("/login");
+    /** 登出（调用后端API） */
+    async logOut() {
+      try {
+        const data = getToken();
+        if (data?.accessToken) {
+          // 调用后端logout API，传递id_token_hint
+          await oauthLogout(data.accessToken);
+        }
+      } catch (error) {
+        console.error("登出失败:", error);
+      } finally {
+        // 清除前端状态
+        this.username = "";
+        this.roles = [];
+        this.permissions = [];
+        removeToken();
+        useMultiTagsStoreHook().handleTags("equal", [...routerArrays]);
+        resetRouter();
+        router.push("/login");
+      }
     },
     /** 刷新`token` */
     async handRefreshToken(data) {

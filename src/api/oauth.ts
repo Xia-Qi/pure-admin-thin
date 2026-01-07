@@ -101,6 +101,17 @@ export async function revokeToken(token: string): Promise<void> {
   );
 }
 
-export async function logout(): Promise<void> {
-  return http.post<void, any>(`${oauthConfig.serverUrl}/connect/logout`);
+export async function logout(idToken?: string): Promise<void> {
+  const params = new URLSearchParams();
+  if (idToken) {
+    params.append("id_token_hint", idToken);
+  }
+  //params.append("post_logout_redirect_uri", window.location.origin);
+
+  return http.post<void, any>(`${oauthConfig.serverUrl}/connect/logout`, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    data: params.toString()
+  });
 }
