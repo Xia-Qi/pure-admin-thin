@@ -56,7 +56,8 @@ const wrapperEnv = (envConf: Recordable): ViteEnv => {
     VITE_ROUTER_HISTORY: "",
     VITE_CDN: false,
     VITE_HIDE_HOME: "false",
-    VITE_COMPRESSION: "none"
+    VITE_COMPRESSION: "none",
+    VITE_PROXY_TARGET: "https://localhost:5700"
   };
 
   for (const envName of Object.keys(envConf)) {

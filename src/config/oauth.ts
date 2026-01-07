@@ -12,9 +12,13 @@ export interface OAuthConfig {
 const oauthConfig: OAuthConfig = {
   serverUrl: import.meta.env.VITE_OAUTH_SERVER_URL || "http://localhost:5700",
   clientId: import.meta.env.VITE_OAUTH_CLIENT_ID || "userManageWebClient",
-  clientSecret: import.meta.env.VITE_OAUTH_CLIENT_SECRET || "userManageWebClient-secret",
-  redirectUri: import.meta.env.VITE_OAUTH_REDIRECT_URI || "http://localhost:8848/callback",
-  postLogoutRedirectUri: import.meta.env.VITE_OAUTH_POST_LOGOUT_REDIRECT_URI || "http://localhost:8848/login",
+  clientSecret:
+    import.meta.env.VITE_OAUTH_CLIENT_SECRET || "userManageWebClient-secret",
+  redirectUri:
+    import.meta.env.VITE_OAUTH_REDIRECT_URI || "http://localhost:8848/callback",
+  postLogoutRedirectUri:
+    import.meta.env.VITE_OAUTH_POST_LOGOUT_REDIRECT_URI ||
+    "http://localhost:8848/login",
   scopes: [
     "openid",
     "profile",

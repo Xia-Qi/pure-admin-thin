@@ -207,14 +207,14 @@ useEventListener(document, "keydown", ({ code }) => {
   display: flex;
   align-items: center;
   margin: 20px 0;
-  color: #909399;
   font-size: 14px;
+  color: #909399;
 
   &::before,
   &::after {
-    content: "";
     flex: 1;
     height: 1px;
+    content: "";
     background: #dcdfe6;
   }
 

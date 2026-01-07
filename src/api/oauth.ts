@@ -1,5 +1,6 @@
 import oauthConfig from "@/config/oauth";
-import { getToken } from "@/utils/auth";
+import { getToken, formatToken } from "@/utils/auth";
+import { http } from "@/utils/http";
 
 export interface TokenResponse {
   access_token: string;
@@ -27,79 +28,79 @@ export interface RefreshTokenParams {
   refreshToken: string;
 }
 
-const oauthServerUrl = import.meta.env.VITE_OAUTH_SERVER_URL || "http://localhost:5700";
-
-async function oauthRequest<T>(
-  method: "GET" | "POST",
-  url: string,
-  data?: string | URLSearchParams,
-  headers?: Record<string, string>
-): Promise<T> {
-  const response = await fetch(`${oauthServerUrl}${url}`, {
-    method,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      ...headers
-    },
-    body: data
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error || `HTTP ${response.status}`);
-  }
-
-  return response.json();
-}
-
-export function exchangeCodeForToken(
+export async function exchangeCodeForToken(
   params: ExchangeCodeForTokenParams
 ): Promise<TokenResponse> {
-  const formData = new URLSearchParams({
+  const tokenParams = {
     grant_type: oauthConfig.grantType,
     code: params.code,
     redirect_uri: params.redirectUri || oauthConfig.redirectUri,
     client_id: oauthConfig.clientId,
     client_secret: oauthConfig.clientSecret
-  });
+  };
 
-  return oauthRequest<TokenResponse>("POST", "/connect/token", formData.toString());
+  return http.oauthToken<TokenResponse>(
+    `${oauthConfig.serverUrl}/connect/token`,
+    tokenParams
+  );
 }
 
-export function refreshToken(
-  params: RefreshTokenParams
-): Promise<TokenResponse> {
-  const formData = new URLSearchParams({
+export async function refreshToken(params: RefreshTokenParams): Promise<{
+  success: boolean;
+  data: { accessToken: string; refreshToken: string; expires: Date };
+}> {
+  const tokenParams = {
     grant_type: "refresh_token",
     refresh_token: params.refreshToken,
     client_id: oauthConfig.clientId,
     client_secret: oauthConfig.clientSecret
-  });
+  };
 
-  return oauthRequest<TokenResponse>("POST", "/connect/token", formData.toString());
+  const data = await http.oauthToken<TokenResponse>(
+    `${oauthConfig.serverUrl}/connect/token`,
+    tokenParams
+  );
+
+  // 转换为前端期望的数据格式
+  return {
+    success: true,
+    data: {
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
+      expires: new Date(Date.now() + data.expires_in * 1000)
+    }
+  };
 }
 
-export function getUserInfo(): Promise<UserInfoResponse> {
+export async function getUserInfo(): Promise<UserInfoResponse> {
   const tokenData = getToken();
   if (!tokenData || !tokenData.accessToken) {
     throw new Error("No token found");
   }
 
-  return oauthRequest<UserInfoResponse>("GET", "/connect/userinfo", undefined, {
-    Authorization: `Bearer ${tokenData.accessToken}`
-  });
+  return http.get<UserInfoResponse, any>(
+    `${oauthConfig.serverUrl}/connect/userinfo`,
+    {
+      headers: {
+        Authorization: formatToken(tokenData.accessToken)
+      }
+    }
+  );
 }
 
-export function revokeToken(token: string): Promise<void> {
-  const formData = new URLSearchParams({
+export async function revokeToken(token: string): Promise<void> {
+  const tokenParams = {
     token: token,
     client_id: oauthConfig.clientId,
     client_secret: oauthConfig.clientSecret
-  });
+  };
 
-  return oauthRequest<void>("POST", "/connect/revocation", formData.toString());
+  return http.oauthToken<void>(
+    `${oauthConfig.serverUrl}/connect/revocation`,
+    tokenParams
+  );
 }
 
-export function logout(): Promise<void> {
-  return oauthRequest<void>("POST", "/connect/logout");
+export async function logout(): Promise<void> {
+  return http.post<void, any>(`${oauthConfig.serverUrl}/connect/logout`);
 }

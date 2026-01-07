@@ -68,15 +68,19 @@ export function setToken(data: DataInfo<Date>) {
       : {}
   );
 
-  function setUserKey({ avatar, username, nickname, roles, permissions }) {
+  function setUserKey(
+    { avatar, username, nickname, roles, permissions },
+    tokenData: { accessToken: string; refreshToken: string; expires: number }
+  ) {
     useUserStoreHook().SET_AVATAR(avatar);
     useUserStoreHook().SET_USERNAME(username);
     useUserStoreHook().SET_NICKNAME(nickname);
     useUserStoreHook().SET_ROLES(roles);
     useUserStoreHook().SET_PERMS(permissions);
     storageLocal().setItem(userKey, {
-      refreshToken,
-      expires,
+      accessToken: tokenData.accessToken,
+      refreshToken: tokenData.refreshToken,
+      expires: tokenData.expires,
       avatar,
       username,
       nickname,
@@ -85,15 +89,20 @@ export function setToken(data: DataInfo<Date>) {
     });
   }
 
+  const tokenData = { accessToken, refreshToken, expires };
+
   if (data.username && data.roles) {
     const { username, roles } = data;
-    setUserKey({
-      avatar: data?.avatar ?? "",
-      username,
-      nickname: data?.nickname ?? "",
-      roles,
-      permissions: data?.permissions ?? []
-    });
+    setUserKey(
+      {
+        avatar: data?.avatar ?? "",
+        username,
+        nickname: data?.nickname ?? "",
+        roles,
+        permissions: data?.permissions ?? []
+      },
+      tokenData
+    );
   } else {
     const avatar =
       storageLocal().getItem<DataInfo<number>>(userKey)?.avatar ?? "";
@@ -105,13 +114,16 @@ export function setToken(data: DataInfo<Date>) {
       storageLocal().getItem<DataInfo<number>>(userKey)?.roles ?? [];
     const permissions =
       storageLocal().getItem<DataInfo<number>>(userKey)?.permissions ?? [];
-    setUserKey({
-      avatar,
-      username,
-      nickname,
-      roles,
-      permissions
-    });
+    setUserKey(
+      {
+        avatar,
+        username,
+        nickname,
+        roles,
+        permissions
+      },
+      tokenData
+    );
   }
 }
 

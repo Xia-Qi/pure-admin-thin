@@ -120,6 +120,7 @@ const whiteList = ["/login", "/callback"];
 const { VITE_HIDE_HOME } = import.meta.env;
 
 router.beforeEach((to: ToRouteType, _from, next) => {
+  debugger;
   to.meta.loaded = loadedPaths.has(to.path);
 
   if (!to.meta.loaded) {
